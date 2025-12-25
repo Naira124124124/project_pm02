@@ -6,32 +6,32 @@ using namespace dynamixel;
 
 #define PORT_NAME "/dev/ttyS2"
 
-// ID устройств
-#define SERVO_ID 1        // Протокол 2.0, скорость 9600
-#define LED_LEFT_ID 8     // Левый светодиод, протокол 1.0, скорость 57600
-#define LED_RIGHT_ID 9    // Правый светодиод, протокол 1.0, скорость 57600  
-#define SWITCH_ID 23      // Протокол 1.0, скорость 57600
+// ID СѓСЃС‚СЂРѕР№СЃС‚РІ
+#define SERVO_ID 1        // РџСЂРѕС‚РѕРєРѕР» 2.0, СЃРєРѕСЂРѕСЃС‚СЊ 9600
+#define LED_LEFT_ID 8     // Р›РµРІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ, РїСЂРѕС‚РѕРєРѕР» 1.0, СЃРєРѕСЂРѕСЃС‚СЊ 57600
+#define LED_RIGHT_ID 9    // РџСЂР°РІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ, РїСЂРѕС‚РѕРєРѕР» 1.0, СЃРєРѕСЂРѕСЃС‚СЊ 57600  
+#define SWITCH_ID 23      // РџСЂРѕС‚РѕРєРѕР» 1.0, СЃРєРѕСЂРѕСЃС‚СЊ 57600
 
-// Регистры для протокола 1.0 (LED и выключатель)
-#define LED_REGISTER_1 26      // Яркость светодиода (0-255)
-#define SWITCH_REGISTER_1 27   // Состояние выключателя
+// Р РµРіРёСЃС‚СЂС‹ РґР»СЏ РїСЂРѕС‚РѕРєРѕР»Р° 1.0 (LED Рё РІС‹РєР»СЋС‡Р°С‚РµР»СЊ)
+#define LED_REGISTER_1 26      // РЇСЂРєРѕСЃС‚СЊ СЃРІРµС‚РѕРґРёРѕРґР° (0-255)
+#define SWITCH_REGISTER_1 27   // РЎРѕСЃС‚РѕСЏРЅРёРµ РІС‹РєР»СЋС‡Р°С‚РµР»СЏ
 
-// Регистры для протокола 2.0 (сервопривод)
+// Р РµРіРёСЃС‚СЂС‹ РґР»СЏ РїСЂРѕС‚РѕРєРѕР»Р° 2.0 (СЃРµСЂРІРѕРїСЂРёРІРѕРґ)
 #define TORQUE_ENABLE_2 64
 #define OPERATING_MODE_2 11
 #define GOAL_VELOCITY_2 104
 
-// Функция для управления светодиодами
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ СЃРІРµС‚РѕРґРёРѕРґР°РјРё
 void setLEDs(PacketHandler* packet, PortHandler* port, bool left_on, bool right_on, uint8_t brightness = 200) {
     uint8_t error = 0;
     
-    // Управляем левым светодиодом (ID 8)
+    // РЈРїСЂР°РІР»СЏРµРј Р»РµРІС‹Рј СЃРІРµС‚РѕРґРёРѕРґРѕРј (ID 8)
     if (packet->ping(port, LED_LEFT_ID, nullptr, &error) == COMM_SUCCESS) {
         uint8_t left_value = left_on ? brightness : 0;
         packet->write1ByteTxRx(port, LED_LEFT_ID, LED_REGISTER_1, left_value, &error);
     }
     
-    // Управляем правым светодиодом (ID 9)
+    // РЈРїСЂР°РІР»СЏРµРј РїСЂР°РІС‹Рј СЃРІРµС‚РѕРґРёРѕРґРѕРј (ID 9)
     if (packet->ping(port, LED_RIGHT_ID, nullptr, &error) == COMM_SUCCESS) {
         uint8_t right_value = right_on ? brightness : 0;
         packet->write1ByteTxRx(port, LED_RIGHT_ID, LED_REGISTER_1, right_value, &error);
@@ -45,10 +45,10 @@ int main() {
     std::cout << "Right LED (ID=9): Protocol 1.0, 57600 baud" << std::endl;
     std::cout << "Switch (ID=23): Protocol 1.0, 57600 baud\n" << std::endl;
     
-    bool servo_right = true; // true = вправо, false = влево
+    bool servo_right = true; // true = РІРїСЂР°РІРѕ, false = РІР»РµРІРѕ
     bool last_switch = false;
     
-    // 1. Инициализация сервопривода (протокол 2.0, 9600)
+    // 1. РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµСЂРІРѕРїСЂРёРІРѕРґР° (РїСЂРѕС‚РѕРєРѕР» 2.0, 9600)
     std::cout << "1. Initializing servo..." << std::endl;
     
     PortHandler* servo_port = PortHandler::getPortHandler(PORT_NAME);
@@ -59,7 +59,7 @@ int main() {
         
         uint8_t error = 0;
         
-        // Проверяем сервопривод
+        // РџСЂРѕРІРµСЂСЏРµРј СЃРµСЂРІРѕРїСЂРёРІРѕРґ
         uint16_t model;
         if (servo_packet->ping(servo_port, SERVO_ID, &model, &error) == COMM_SUCCESS) {
             std::cout << "   ? Servo found (Model: " << model << ")" << std::endl;
@@ -69,7 +69,7 @@ int main() {
             return -1;
         }
         
-        // Настраиваем сервопривод
+        // РќР°СЃС‚СЂР°РёРІР°РµРј СЃРµСЂРІРѕРїСЂРёРІРѕРґ
         servo_packet->write1ByteTxRx(servo_port, SERVO_ID, TORQUE_ENABLE_2, 1, &error);
         servo_packet->write1ByteTxRx(servo_port, SERVO_ID, OPERATING_MODE_2, 1, &error);
         servo_packet->write4ByteTxRx(servo_port, SERVO_ID, GOAL_VELOCITY_2, 200, &error);
@@ -79,7 +79,7 @@ int main() {
         servo_port->closePort();
     }
     
-    // 2. Инициализация светодиодов (протокол 1.0, 57600)
+    // 2. РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРІРµС‚РѕРґРёРѕРґРѕРІ (РїСЂРѕС‚РѕРєРѕР» 1.0, 57600)
     std::cout << "2. Initializing LEDs..." << std::endl;
     
     PortHandler* led_port = PortHandler::getPortHandler(PORT_NAME);
@@ -90,7 +90,7 @@ int main() {
         
         uint8_t error = 0;
         
-        // Проверяем и инициализируем левый светодиод
+        // РџСЂРѕРІРµСЂСЏРµРј Рё РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Р»РµРІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ
         uint16_t left_model;
         if (led_packet->ping(led_port, LED_LEFT_ID, &left_model, &error) == COMM_SUCCESS) {
             std::cout << "   ? Left LED found (ID=" << (int)LED_LEFT_ID << ", Model: " << left_model << ")" << std::endl;
@@ -98,7 +98,7 @@ int main() {
             std::cout << "   ??  Left LED (ID=" << (int)LED_LEFT_ID << ") not found" << std::endl;
         }
         
-        // Проверяем и инициализируем правый светодиод
+        // РџСЂРѕРІРµСЂСЏРµРј Рё РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РїСЂР°РІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ
         uint16_t right_model;
         if (led_packet->ping(led_port, LED_RIGHT_ID, &right_model, &error) == COMM_SUCCESS) {
             std::cout << "   ? Right LED found (ID=" << (int)LED_RIGHT_ID << ", Model: " << right_model << ")" << std::endl;
@@ -106,19 +106,19 @@ int main() {
             std::cout << "   ??  Right LED (ID=" << (int)LED_RIGHT_ID << ") not found" << std::endl;
         }
         
-        // Включаем правый светодиод (начальное направление - вправо)
+        // Р’РєР»СЋС‡Р°РµРј РїСЂР°РІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ (РЅР°С‡Р°Р»СЊРЅРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ - РІРїСЂР°РІРѕ)
         setLEDs(led_packet, led_port, false, true);
         std::cout << "   ?? Right LED ON (direction: RIGHT)\n" << std::endl;
         
         led_port->closePort();
     }
     
-    // 3. Основной цикл с выключателем
+    // 3. РћСЃРЅРѕРІРЅРѕР№ С†РёРєР» СЃ РІС‹РєР»СЋС‡Р°С‚РµР»РµРј
     std::cout << "3. Starting switch monitoring..." << std::endl;
     std::cout << "   Press switch to toggle direction\n" << std::endl;
     
     while (true) {
-        // Читаем выключатель (протокол 1.0, 57600)
+        // Р§РёС‚Р°РµРј РІС‹РєР»СЋС‡Р°С‚РµР»СЊ (РїСЂРѕС‚РѕРєРѕР» 1.0, 57600)
         PortHandler* sw_port = PortHandler::getPortHandler(PORT_NAME);
         PacketHandler* sw_packet = PacketHandler::getPacketHandler(1.0);
         
@@ -127,7 +127,7 @@ int main() {
             
             uint8_t state, error = 0;
             
-            // Проверяем выключатель
+            // РџСЂРѕРІРµСЂСЏРµРј РІС‹РєР»СЋС‡Р°С‚РµР»СЊ
             if (sw_packet->ping(sw_port, SWITCH_ID, nullptr, &error) != COMM_SUCCESS) {
                 std::cout << "Switch error!" << std::endl;
                 sw_port->closePort();
@@ -135,17 +135,17 @@ int main() {
                 continue;
             }
             
-            // Читаем состояние
+            // Р§РёС‚Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ
             sw_packet->read1ByteTxRx(sw_port, SWITCH_ID, SWITCH_REGISTER_1, &state, &error);
             sw_port->closePort();
             
             bool pressed = (state == 1);
             
-            // Если нажали кнопку
+            // Р•СЃР»Рё РЅР°Р¶Р°Р»Рё РєРЅРѕРїРєСѓ
             if (pressed && !last_switch) {
-                servo_right = !servo_right; // Меняем направление
+                servo_right = !servo_right; // РњРµРЅСЏРµРј РЅР°РїСЂР°РІР»РµРЅРёРµ
                 
-                // Управляем сервоприводом (протокол 2.0, 9600)
+                // РЈРїСЂР°РІР»СЏРµРј СЃРµСЂРІРѕРїСЂРёРІРѕРґРѕРј (РїСЂРѕС‚РѕРєРѕР» 2.0, 9600)
                 PortHandler* s_port = PortHandler::getPortHandler(PORT_NAME);
                 PacketHandler* s_packet = PacketHandler::getPacketHandler(2.0);
                 
@@ -163,7 +163,7 @@ int main() {
                     s_port->closePort();
                 }
                 
-                // Управляем светодиодами (протокол 1.0, 57600)
+                // РЈРїСЂР°РІР»СЏРµРј СЃРІРµС‚РѕРґРёРѕРґР°РјРё (РїСЂРѕС‚РѕРєРѕР» 1.0, 57600)
                 PortHandler* l_port = PortHandler::getPortHandler(PORT_NAME);
                 PacketHandler* l_packet = PacketHandler::getPacketHandler(1.0);
                 
@@ -171,11 +171,11 @@ int main() {
                     usleep(100000);
                     
                     if (servo_right) {
-                        // Вращение вправо: правый светодиод горит, левый выключен
+                        // Р’СЂР°С‰РµРЅРёРµ РІРїСЂР°РІРѕ: РїСЂР°РІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ РіРѕСЂРёС‚, Р»РµРІС‹Р№ РІС‹РєР»СЋС‡РµРЅ
                         setLEDs(l_packet, l_port, false, true);
                         std::cout << "   ?? Right LED ON, Left LED OFF" << std::endl;
                     } else {
-                        // Вращение влево: левый светодиод горит, правый выключен
+                        // Р’СЂР°С‰РµРЅРёРµ РІР»РµРІРѕ: Р»РµРІС‹Р№ СЃРІРµС‚РѕРґРёРѕРґ РіРѕСЂРёС‚, РїСЂР°РІС‹Р№ РІС‹РєР»СЋС‡РµРЅ
                         setLEDs(l_packet, l_port, true, false);
                         std::cout << "   ?? Left LED ON, Right LED OFF" << std::endl;
                     }
@@ -183,14 +183,14 @@ int main() {
                     l_port->closePort();
                 }
                 
-                // Мигание для обратной связи
+                // РњРёРіР°РЅРёРµ РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРІСЏР·Рё
                 PortHandler* blink_port = PortHandler::getPortHandler(PORT_NAME);
                 PacketHandler* blink_packet = PacketHandler::getPacketHandler(1.0);
                 
                 if (blink_port->openPort() && blink_port->setBaudRate(57600)) {
                     usleep(50000);
                     
-                    // Кратковременно выключаем текущий светодиод
+                    // РљСЂР°С‚РєРѕРІСЂРµРјРµРЅРЅРѕ РІС‹РєР»СЋС‡Р°РµРј С‚РµРєСѓС‰РёР№ СЃРІРµС‚РѕРґРёРѕРґ
                     if (servo_right) {
                         blink_packet->write1ByteTxRx(blink_port, LED_RIGHT_ID, LED_REGISTER_1, 0, &error);
                     } else {
@@ -199,7 +199,7 @@ int main() {
                     
                     usleep(50000);
                     
-                    // Включаем обратно
+                    // Р’РєР»СЋС‡Р°РµРј РѕР±СЂР°С‚РЅРѕ
                     if (servo_right) {
                         blink_packet->write1ByteTxRx(blink_port, LED_RIGHT_ID, LED_REGISTER_1, 200, &error);
                     } else {
@@ -216,7 +216,7 @@ int main() {
         usleep(50000); // 50ms
     }
     
-    // Перед выходом выключаем все светодиоды
+    // РџРµСЂРµРґ РІС‹С…РѕРґРѕРј РІС‹РєР»СЋС‡Р°РµРј РІСЃРµ СЃРІРµС‚РѕРґРёРѕРґС‹
     PortHandler* cleanup_port = PortHandler::getPortHandler(PORT_NAME);
     PacketHandler* cleanup_packet = PacketHandler::getPacketHandler(1.0);
     
